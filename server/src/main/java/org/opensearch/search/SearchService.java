@@ -426,6 +426,36 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         Property.NodeScope
     );
 
+    /**
+     * Enables batched inner hits execution for parent-child join queries.
+     * When enabled, N inner hit searches are batched into a single search,
+     * reducing segment scans from N×S to S.
+     *
+     * @opensearch.experimental
+     */
+    @ExperimentalApi
+    public static final Setting<Boolean> INNER_HITS_BATCH_ENABLED_SETTING = Setting.boolSetting(
+        "search.inner_hits.batch.enabled",
+        false,
+        Property.Dynamic,
+        Property.NodeScope
+    );
+
+    /**
+     * Maximum number of parent hits to batch. If the number of hits exceeds this limit,
+     * falls back to sequential per-hit execution.
+     *
+     * @opensearch.experimental
+     */
+    @ExperimentalApi
+    public static final Setting<Integer> INNER_HITS_BATCH_SIZE_SETTING = Setting.intSetting(
+        "search.inner_hits.batch.size",
+        1000,
+        1,
+        Property.Dynamic,
+        Property.NodeScope
+    );
+
     // value 0 can disable dynamic pruning optimization in cardinality aggregation
     public static final Setting<Integer> CARDINALITY_AGGREGATION_PRUNING_THRESHOLD = Setting.intSetting(
         "search.dynamic_pruning.cardinality_aggregation.max_allowed_cardinality",

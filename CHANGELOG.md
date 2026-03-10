@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased 3.x]
 ### Added
+- Add batched inner hits for parent-child join to reduce segment scans ([#20563](https://github.com/opensearch-project/OpenSearch/issues/20563))
 - Add bitmap64 query support ([#20606](https://github.com/opensearch-project/OpenSearch/pull/20606))
 - Add ProfilingWrapper interface for plugin access to delegates in profiling decorators ([#20607](https://github.com/opensearch-project/OpenSearch/pull/20607))
 - Support expected cluster name with validation in CCS Sniff mode ([#20532](https://github.com/opensearch-project/OpenSearch/pull/20532))

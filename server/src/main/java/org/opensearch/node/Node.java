@@ -332,6 +332,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -1490,6 +1492,18 @@ public class Node implements Closeable {
                 cacheService
             );
 
+            final AtomicBoolean innerHitsBatchEnabled = new AtomicBoolean(
+                SearchService.INNER_HITS_BATCH_ENABLED_SETTING.get(settings)
+            );
+            clusterService.getClusterSettings()
+                .addSettingsUpdateConsumer(SearchService.INNER_HITS_BATCH_ENABLED_SETTING, innerHitsBatchEnabled::set);
+
+            final AtomicInteger innerHitsBatchSize = new AtomicInteger(
+                SearchService.INNER_HITS_BATCH_SIZE_SETTING.get(settings)
+            );
+            clusterService.getClusterSettings()
+                .addSettingsUpdateConsumer(SearchService.INNER_HITS_BATCH_SIZE_SETTING, innerHitsBatchSize::set);
+
             final SearchService searchService = newSearchService(
                 clusterService,
                 indicesService,
@@ -1497,7 +1511,7 @@ public class Node implements Closeable {
                 scriptService,
                 bigArrays,
                 searchModule.getQueryPhase(),
-                searchModule.getFetchPhase(),
+                searchModule.getFetchPhase(innerHitsBatchEnabled::get, innerHitsBatchSize::get),
                 responseCollectorService,
                 circuitBreakerService,
                 searchModule.getIndexSearcherExecutor(threadPool),

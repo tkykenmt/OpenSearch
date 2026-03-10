@@ -55,6 +55,8 @@ import org.opensearch.search.profile.Profilers;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -115,6 +117,31 @@ public final class InnerHitsContext {
         }
 
         public abstract TopDocsAndMaxScore topDocs(SearchHit hit) throws IOException;
+
+        /**
+         * Returns whether this context supports batch execution of topDocs.
+         *
+         * @opensearch.experimental
+         */
+        public boolean supportsBatchExecution() {
+            return false;
+        }
+
+        /**
+         * Batch version of {@link #topDocs(SearchHit)}. Executes a single search for all hits
+         * instead of N individual searches.
+         * <p>
+         * Default implementation falls back to calling {@link #topDocs(SearchHit)} for each hit.
+         *
+         * @opensearch.experimental
+         */
+        public Map<SearchHit, TopDocsAndMaxScore> topDocs(List<SearchHit> hits) throws IOException {
+            Map<SearchHit, TopDocsAndMaxScore> results = new LinkedHashMap<>();
+            for (SearchHit hit : hits) {
+                results.put(hit, topDocs(hit));
+            }
+            return results;
+        }
 
         public String getName() {
             return name;

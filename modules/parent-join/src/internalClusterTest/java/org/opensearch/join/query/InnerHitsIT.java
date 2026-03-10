@@ -51,6 +51,7 @@ import org.opensearch.script.Script;
 import org.opensearch.script.ScriptType;
 import org.opensearch.search.SearchHit;
 import org.opensearch.search.SearchHits;
+import org.opensearch.search.SearchService;
 import org.opensearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.opensearch.search.sort.FieldSortBuilder;
 import org.opensearch.search.sort.SortBuilders;
@@ -100,7 +101,17 @@ public class InnerHitsIT extends ParentChildTestCase {
     public static Collection<Object[]> parameters() {
         return Arrays.asList(
             new Object[] { Settings.builder().put(CLUSTER_CONCURRENT_SEGMENT_SEARCH_SETTING.getKey(), false).build() },
-            new Object[] { Settings.builder().put(CLUSTER_CONCURRENT_SEGMENT_SEARCH_SETTING.getKey(), true).build() }
+            new Object[] { Settings.builder().put(CLUSTER_CONCURRENT_SEGMENT_SEARCH_SETTING.getKey(), true).build() },
+            new Object[] {
+                Settings.builder()
+                    .put(CLUSTER_CONCURRENT_SEGMENT_SEARCH_SETTING.getKey(), false)
+                    .put(SearchService.INNER_HITS_BATCH_ENABLED_SETTING.getKey(), true)
+                    .build() },
+            new Object[] {
+                Settings.builder()
+                    .put(CLUSTER_CONCURRENT_SEGMENT_SEARCH_SETTING.getKey(), true)
+                    .put(SearchService.INNER_HITS_BATCH_ENABLED_SETTING.getKey(), true)
+                    .build() }
         );
     }
 

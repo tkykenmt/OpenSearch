@@ -294,6 +294,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
@@ -1318,6 +1319,10 @@ public class SearchModule {
 
     public FetchPhase getFetchPhase() {
         return new FetchPhase(fetchSubPhases);
+    }
+
+    public FetchPhase getFetchPhase(Supplier<Boolean> innerHitsBatchEnabledSupplier, Supplier<Integer> innerHitsBatchSizeSupplier) {
+        return new FetchPhase(fetchSubPhases, innerHitsBatchEnabledSupplier, innerHitsBatchSizeSupplier);
     }
 
     public QueryPhase getQueryPhase() {

@@ -87,6 +87,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
 
@@ -103,8 +104,12 @@ public class FetchPhase {
     private final FetchSubPhase[] fetchSubPhases;
 
     public FetchPhase(List<FetchSubPhase> fetchSubPhases) {
+        this(fetchSubPhases, () -> false, () -> 1000);
+    }
+
+    public FetchPhase(List<FetchSubPhase> fetchSubPhases, Supplier<Boolean> innerHitsBatchEnabledSupplier, Supplier<Integer> innerHitsBatchSizeSupplier) {
         this.fetchSubPhases = fetchSubPhases.toArray(new FetchSubPhase[fetchSubPhases.size() + 1]);
-        this.fetchSubPhases[fetchSubPhases.size()] = new InnerHitsPhase(this);
+        this.fetchSubPhases[fetchSubPhases.size()] = new InnerHitsPhase(this, innerHitsBatchEnabledSupplier, innerHitsBatchSizeSupplier);
     }
 
     public void execute(SearchContext context) {
@@ -249,6 +254,18 @@ public class FetchPhase {
         }
         if (context.isCancelled()) {
             throw new TaskCancelledException("cancelled task with reason: " + context.getTask().getReasonCancelled());
+        }
+
+        for (Tuple<FetchSubPhaseProcessor, FetchSubPhase> p : processors) {
+            FetchProfileBreakdown pbd = processorProfiles.get(p.v1());
+            try {
+                profile(pbd, FetchTimingType.PROCESS, (CheckedSupplier<Void, IOException>) () -> {
+                    p.v1().complete();
+                    return null;
+                });
+            } catch (Exception e) {
+                throw new FetchPhaseExecutionException(context.shardTarget(), "Error running fetch sub-phase complete", e);
+            }
         }
 
         TotalHits totalHits = context.queryResult().getTotalHits();

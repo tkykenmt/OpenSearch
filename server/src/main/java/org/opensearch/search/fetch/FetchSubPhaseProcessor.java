@@ -54,4 +54,12 @@ public interface FetchSubPhaseProcessor {
      */
     void process(HitContext hitContext) throws IOException;
 
+    /**
+     * Called after all hits have been processed. Allows sub-phases to perform
+     * batch operations that are more efficient than per-hit processing.
+     *
+     * @opensearch.experimental
+     */
+    default void complete() throws IOException {}
+
 }
